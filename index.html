@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passport Photo Validator v2.0</title>
+    <title>Photo Validator v3.0</title>
     <style>
         * {
             margin: 0;
@@ -276,14 +276,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>📷 Passport Photo Validator</h1>
-        <p class="subtitle">Bangladesh Passport Photo Validation Service v2.0 — Upload & Validate</p>
+        <h1>📷 Photo Validator</h1>
+        <p class="subtitle">Photo Validation Service v3.0— Upload & Validate</p>
 
         <div class="card">
             <div class="drop-zone" id="dropZone">
                 <div class="icon">📤</div>
                 <p><strong>Click to upload</strong> or drag & drop a photo</p>
-                <p class="file-types">JPG, JPEG, PNG, BMP, TIFF, WEBP</p>
+                <p class="file-types">JPG, JPEG, PNG, WEBP</p>
             </div>
             <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp">
 
@@ -362,12 +362,12 @@
         });
 
         function handleFile(file) {
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/tiff', 'image/webp'];
-            const allowedExts = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'];
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
             const ext = '.' + file.name.split('.').pop().toLowerCase();
 
             if (!allowedExts.includes(ext) && !allowedTypes.includes(file.type)) {
-                showError('Invalid file type. Please upload: JPG, JPEG, PNG, BMP, TIFF, or WEBP');
+                showError('Invalid file type. Please upload: JPG, JPEG, PNG or WEBP');
                 return;
             }
 

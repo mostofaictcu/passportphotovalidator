@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Passport Photo Validator API v2.0 for Bangladesh
+Passport Photo Validator API v3.0 for Bangladesh
 FastAPI-based async REST API for validating passport photos.
 """
 
@@ -20,7 +20,9 @@ from pydantic import BaseModel
 import uvicorn
 import aiofiles
 
-from validator import PassportPhotoValidatorV2
+#from validator import PassportPhotoValidatorV2
+#from validator_v22 import PassportPhotoValidatorV2
+from validator_mediapipe_fixed import PassportPhotoValidatorV3
 
 # Configure logging
 logging.basicConfig(
@@ -30,7 +32,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Passport Photo Validator API v2.0",
+    title="Passport Photo Validator API v3.0",
     description="Bangladesh passport photo validation service. Upload an image to validate.",
     version="2.0.0"
 )
@@ -57,7 +59,7 @@ class ValidationResponse(BaseModel):
 async def root():
     """Root endpoint with API info"""
     return {
-        "name": "Passport Photo Validator API v2.0",
+        "name": "Passport Photo Validator API v3.0",
         "version": "2.0.0",
         "description": "Bangladesh passport photo validation service",
         "endpoints": {
@@ -87,12 +89,12 @@ async def validate_photo(file: UploadFile = File(...)):
     """
     Upload a passport photo for validation.
 
-    - **file**: Image file (jpg, jpeg, png, bmp, tiff, webp)
+    - **file**: Image file (jpg, jpeg, png, webp)
 
     Returns detailed validation results in JSON format.
     """
     # Validate file extension
-    allowed_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
+    allowed_extensions = {'.jpg', '.jpeg', '.png', '.webp'}
     file_ext = Path(file.filename).suffix.lower()
 
     if file_ext not in allowed_extensions:
@@ -114,23 +116,30 @@ async def validate_photo(file: UploadFile = File(...)):
                 await buffer.write(chunk)
 
         # Run CPU-bound validation in thread pool to avoid blocking the event loop
-        validator = PassportPhotoValidatorV2(temp_path)
+        #validator = PassportPhotoValidatorV2(temp_path)
+        validator = PassportPhotoValidatorV3(temp_path)
         is_valid = await asyncio.to_thread(validator.validate)
 
-        return ValidationResponse(
+        # Prepare response
+        response = ValidationResponse(
             success=bool(is_valid),
             filename=file.filename,
-            version="v2.0",
+            version="v3.0",
             status="PASSED" if is_valid else "FAILED",
             results=validator.validation_results
         )
+
+        # Remove temp file after validation completes
+        await asyncio.to_thread(shutil.rmtree, temp_dir, ignore_errors=True)
+        
+        return response
 
     except Exception as e:
         logger.error(f"Error processing {file.filename}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
 
     finally:
-        # Cleanup temp files (async-friendly cleanup)
+        # Cleanup temp files (async-friendly cleanup) - fallback cleanup
         await asyncio.to_thread(shutil.rmtree, temp_dir, ignore_errors=True)
         await file.close()
 

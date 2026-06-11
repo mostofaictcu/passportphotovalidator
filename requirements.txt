@@ -5,3 +5,4 @@ pydantic>=2.5.0
 numpy>=1.24.0
 opencv-python-headless>=4.8.0
 aiofiles>=23.0.0
+mediapipe==0.10.14

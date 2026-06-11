@@ -27,6 +27,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 COPY validator.py .
 COPY index.html .
+COPY validator_v22.py .
+COPY validator_mediapipe_fixed.py .
 # Expose port
 EXPOSE 8000
 
