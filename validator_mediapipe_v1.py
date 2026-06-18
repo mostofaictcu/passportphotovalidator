@@ -213,14 +213,21 @@ class PassportPhotoValidatorV3:
         self.mp_face_landmarks = None
         self.mp_head_pose = None
 
-        # Dimensions
-        self.STANDARD_WIDTH = 300
-        self.STANDARD_HEIGHT = 300
-        self.TOLERANCE = 1.0
-        self.MIN_WIDTH = self.STANDARD_WIDTH * (1 - self.TOLERANCE)
-        self.MAX_WIDTH = self.STANDARD_WIDTH * (1 + self.TOLERANCE)
-        self.MIN_HEIGHT = self.STANDARD_HEIGHT * (1 - self.TOLERANCE)
-        self.MAX_HEIGHT = self.STANDARD_HEIGHT * (1 + self.TOLERANCE)
+        # =============================================================================
+        # STRICT 300x300 DIMENSIONS - OLD CODE COMMENTED OUT
+        # =============================================================================
+        # Previous tolerance-based dimension logic (commented out):
+        # self.STANDARD_WIDTH = 300
+        # self.STANDARD_HEIGHT = 300
+        # self.TOLERANCE = 1.0
+        # self.MIN_WIDTH = self.STANDARD_WIDTH * (1 - self.TOLERANCE)
+        # self.MAX_WIDTH = self.STANDARD_WIDTH * (1 + self.TOLERANCE)
+        # self.MIN_HEIGHT = self.STANDARD_HEIGHT * (1 - self.TOLERANCE)
+        # self.MAX_HEIGHT = self.STANDARD_HEIGHT * (1 + self.TOLERANCE)
+
+        # New strict 300x300 enforcement:
+        self.REQUIRED_WIDTH = 300
+        self.REQUIRED_HEIGHT = 300
 
         self._resolve_thresholds()
         self._init_mediapipe()
@@ -431,20 +438,45 @@ class PassportPhotoValidatorV3:
         y_min, y_max = int(min(ys)), int(max(ys))
         return (x_min, y_min, x_max - x_min, y_max - y_min)
 
+    # =============================================================================
+    # STRICT 300x300 DIMENSION CHECK - OLD CODE COMMENTED OUT
+    # =============================================================================
     def check_image_dimensions(self):
-        valid = (self.MIN_HEIGHT <= self.height <= self.MAX_HEIGHT and
-                 self.MIN_WIDTH <= self.width <= self.MAX_WIDTH)
-        aspect_ratio = self.width / self.height
-        standard_aspect = self.STANDARD_WIDTH / self.STANDARD_HEIGHT
+        # OLD tolerance-based logic (commented out):
+        # valid = (self.MIN_HEIGHT <= self.height <= self.MAX_HEIGHT and
+        #          self.MIN_WIDTH <= self.width <= self.MAX_WIDTH)
+        # aspect_ratio = self.width / self.height
+        # standard_aspect = self.STANDARD_WIDTH / self.STANDARD_HEIGHT
+        # self.validation_results['dimensions'] = {
+        #     'valid': bool(valid),
+        #     'width': int(self.width), 'height': int(self.height),
+        #     'aspect_ratio': round(float(aspect_ratio), 2),
+        #     'standard_aspect_ratio': round(float(standard_aspect), 2),
+        #     'width_range': f"{self.MIN_WIDTH:.0f}-{self.MAX_WIDTH:.0f}px",
+        #     'height_range': f"{self.MIN_HEIGHT:.0f}-{self.MAX_HEIGHT:.0f}px"
+        # }
+        # return bool(valid)
+
+        # NEW strict 300x300 enforcement:
+        is_exact_width = (self.width == self.REQUIRED_WIDTH)
+        is_exact_height = (self.height == self.REQUIRED_HEIGHT)
+        is_valid = is_exact_width and is_exact_height
+
+        if not is_valid:
+            self.validation_issues.append('ISSUE_DIMENSIONS_NOT_300x300')
+
         self.validation_results['dimensions'] = {
-            'valid': bool(valid),
-            'width': int(self.width), 'height': int(self.height),
-            'aspect_ratio': round(float(aspect_ratio), 2),
-            'standard_aspect_ratio': round(float(standard_aspect), 2),
-            'width_range': f"{self.MIN_WIDTH:.0f}-{self.MAX_WIDTH:.0f}px",
-            'height_range': f"{self.MIN_HEIGHT:.0f}-{self.MAX_HEIGHT:.0f}px"
+            'valid': bool(is_valid),
+            'width': int(self.width),
+            'height': int(self.height),
+            'required_width': self.REQUIRED_WIDTH,
+            'required_height': self.REQUIRED_HEIGHT,
+            'width_exact': bool(is_exact_width),
+            'height_exact': bool(is_exact_height),
+            'message': 'Exact 300x300 required' if not is_valid else 'Dimensions correct: 300x300',
+            'issue_code': 'ISSUE_DIMENSIONS_NOT_300x300' if not is_valid else None
         }
-        return bool(valid)
+        return bool(is_valid)
 
     def check_photo_sharpness(self):
         try:

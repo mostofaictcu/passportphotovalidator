@@ -29,6 +29,7 @@ COPY validator.py .
 COPY index.html .
 COPY validator_v22.py .
 COPY validator_mediapipe_fixed.py .
+COPY validator_mediapipe_v1.py .
 # Expose port
 EXPOSE 8000
 

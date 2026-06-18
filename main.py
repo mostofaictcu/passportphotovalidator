@@ -22,7 +22,7 @@ import aiofiles
 
 #from validator import PassportPhotoValidatorV2
 #from validator_v22 import PassportPhotoValidatorV2
-from validator_mediapipe_fixed import PassportPhotoValidatorV3
+from validator_mediapipe_v1 import PassportPhotoValidatorV3
 
 # Configure logging
 logging.basicConfig(
@@ -89,12 +89,12 @@ async def validate_photo(file: UploadFile = File(...)):
     """
     Upload a passport photo for validation.
 
-    - **file**: Image file (jpg, jpeg, png, webp)
+    - **file**: Image file (jpg, jpeg, png)
 
     Returns detailed validation results in JSON format.
     """
     # Validate file extension
-    allowed_extensions = {'.jpg', '.jpeg', '.png', '.webp'}
+    allowed_extensions = {'.jpg', '.jpeg', '.png'}
     file_ext = Path(file.filename).suffix.lower()
 
     if file_ext not in allowed_extensions:
