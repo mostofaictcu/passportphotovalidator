@@ -30,12 +30,16 @@ COPY index.html .
 COPY validator_v22.py .
 COPY validator_mediapipe_fixed.py .
 COPY validator_mediapipe_v1.py .
+
+# Set default port (override at runtime with -e PORT=5001)
+ENV PORT=5001
+
 # Expose port
-EXPOSE 8000
+EXPOSE 5001
 
-# Health check
+# Health check - uses the PORT env var dynamically
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+    CMD sh -c "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:${PORT}/health')\"" || exit 1
 
-# Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application - binds to 0.0.0.0 on the PORT env var
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
