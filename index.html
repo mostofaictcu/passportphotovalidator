@@ -314,6 +314,7 @@
         </div>
 
         <p class="footer">API Endpoint: http://103.94.131.155:5001/validate</p>
+        <p class="footer">API Endpoint: https://itsupport.cu.ac.bd/passport/validate</p>
     </div>
 
     <script>
@@ -452,7 +453,7 @@
                     xhr.addEventListener('error', () => reject(new Error('Network error')));
                     xhr.addEventListener('abort', () => reject(new Error('Upload aborted')));
 
-                    xhr.open('POST', '/validate');
+                    xhr.open('POST', 'validate');
                     xhr.send(formData);
                 });
 
