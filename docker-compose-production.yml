@@ -4,16 +4,15 @@ services:
   passport-validator:
     build: .
     container_name: passport-validator-api
-    # Remove host port if you only want access through Nginx
-    # ports:
-    #   - "5001:8000"
+    expose:
+      - "5001"
     environment:
-      - PORT=8000
+      - PORT=5001
     restart: unless-stopped
     networks:
       - helpdesk-backend_default
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
